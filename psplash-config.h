@@ -31,4 +31,7 @@
 /* Position of the image split from top edge, denominator of fraction */
 #define PSPLASH_IMG_SPLIT_DENOMINATOR 6
 
+/* Padding for message (space in pixels between message and progress bar) */
+#define PSPLASH_MSG_PADDING 4
+
 #endif

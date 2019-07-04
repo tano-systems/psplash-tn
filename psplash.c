@@ -53,14 +53,14 @@ psplash_draw_msg (PSplashFB *fb, const char *msg)
 
   psplash_fb_draw_rect (fb, 
 			0, 
-			SPLIT_LINE_POS(fb) - h, 
+			SPLIT_LINE_POS(fb) - h - PSPLASH_MSG_PADDING,
 			fb->width,
 			h,
 			PSPLASH_BACKGROUND_COLOR);
 
   psplash_fb_draw_text (fb,
 			(fb->width-w)/2, 
-			SPLIT_LINE_POS(fb) - h,
+			SPLIT_LINE_POS(fb) - h - PSPLASH_MSG_PADDING,
 			PSPLASH_TEXT_COLOR,
 			&radeon_font,
 			msg);
