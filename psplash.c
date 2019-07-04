@@ -22,7 +22,6 @@
 #include "psplash-config.h"
 #include "psplash-colors.h"
 #include "psplash-poky-img.h"
-#include "psplash-bar-img.h"
 #include "radeon-font.h"
 
 #define SPLIT_LINE_POS(fb)                                  \
@@ -70,12 +69,13 @@ void
 psplash_draw_progress (PSplashFB *fb, int value)
 {
   int x, y, width, height, barwidth;
+  int padding = PSPLASH_BAR_BORDER_WIDTH + PSPLASH_BAR_BORDER_SPACE;
 
-  /* 4 pix border */
-  x      = ((fb->width  - BAR_IMG_WIDTH)/2) + 4 ;
-  y      = SPLIT_LINE_POS(fb) + 4;
-  width  = BAR_IMG_WIDTH - 8; 
-  height = BAR_IMG_HEIGHT - 8;
+  x = ((fb->width - PSPLASH_BAR_WIDTH)/2) + padding;
+  y = SPLIT_LINE_POS(fb) + padding;
+
+  width  = PSPLASH_BAR_WIDTH - padding * 2;
+  height = PSPLASH_BAR_HEIGHT - padding * 2;
 
   if (value > 0)
     {
@@ -99,6 +99,34 @@ psplash_draw_progress (PSplashFB *fb, int value)
 
   DBG("value: %i, width: %i, barwidth :%i\n", value, 
 		width, barwidth);
+}
+
+void
+psplash_draw_progress_border(PSplashFB *fb)
+{
+  int x = (fb->width  - PSPLASH_BAR_WIDTH)/2;
+  int y = SPLIT_LINE_POS(fb);
+
+#if PSPLASH_BAR_BORDER_WIDTH > 0
+  /* border */
+  psplash_fb_draw_box(fb,
+    x, y,
+    PSPLASH_BAR_WIDTH,
+    PSPLASH_BAR_HEIGHT,
+    PSPLASH_BAR_BORDER_WIDTH,
+    PSPLASH_BAR_BORDER_COLOR);
+
+#if PSPLASH_BAR_BORDER_SPACE > 0
+  /* border space */
+  psplash_fb_draw_box(fb,
+    x + PSPLASH_BAR_BORDER_WIDTH,
+    y + PSPLASH_BAR_BORDER_WIDTH,
+    PSPLASH_BAR_WIDTH - PSPLASH_BAR_BORDER_WIDTH * 2,
+    PSPLASH_BAR_HEIGHT - PSPLASH_BAR_BORDER_WIDTH * 2,
+    PSPLASH_BAR_BORDER_SPACE,
+    PSPLASH_BAR_BORDER_SPACE_COLOR);
+#endif
+#endif
 }
 
 static int 
@@ -294,15 +322,9 @@ main (int argc, char** argv)
 			 POKY_IMG_RLE_PIXEL_DATA);
 
   /* Draw progress bar border */
-  psplash_fb_draw_image (fb, 
-			 (fb->width  - BAR_IMG_WIDTH)/2, 
-			 SPLIT_LINE_POS(fb),
-			 BAR_IMG_WIDTH,
-			 BAR_IMG_HEIGHT,
-			 BAR_IMG_BYTES_PER_PIXEL,
-			 BAR_IMG_ROWSTRIDE,
-			 BAR_IMG_RLE_PIXEL_DATA);
+  psplash_draw_progress_border(fb);
 
+  /* Draw initial progress bar */
   psplash_draw_progress (fb, 0);
 
 #ifdef PSPLASH_STARTUP_MSG

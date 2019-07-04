@@ -58,6 +58,17 @@ PSplashFB*
 psplash_fb_new (int angle, int fbdev_id);
 
 void
+psplash_fb_draw_box (PSplashFB    *fb, 
+		      int          x, 
+		      int          y, 
+		      int          width, 
+		      int          height,
+		      int          thickness,
+		      uint8        red,
+		      uint8        green,
+		      uint8        blue);
+
+void
 psplash_fb_draw_rect (PSplashFB    *fb, 
 		      int          x, 
 		      int          y, 

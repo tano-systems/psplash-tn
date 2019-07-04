@@ -34,4 +34,16 @@
 /* Padding for message (space in pixels between message and progress bar) */
 #define PSPLASH_MSG_PADDING 4
 
+/* Progress bar width (in pixels) */
+#define PSPLASH_BAR_WIDTH 230
+
+/* Progress bar height (in pixels) */
+#define PSPLASH_BAR_HEIGHT 28
+
+/* Progress bar border thickness (in pixels) */
+#define PSPLASH_BAR_BORDER_WIDTH 2
+
+/* Size in pixels between progress bar and its border */
+#define PSPLASH_BAR_BORDER_SPACE 1
+
 #endif

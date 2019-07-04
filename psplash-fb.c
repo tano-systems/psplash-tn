@@ -389,6 +389,43 @@ psplash_fb_draw_rect (PSplashFB    *fb,
 }
 
 void
+psplash_fb_draw_box (PSplashFB    *fb, 
+		      int          x, 
+		      int          y, 
+		      int          width, 
+		      int          height,
+		      int          thickness,
+		      uint8        red,
+		      uint8        green,
+		      uint8        blue)
+{
+  int dx, dy;
+
+  if (thickness <= 0)
+    return;
+
+  /* Vertical */
+  for (dy=0; dy < height; dy++)
+  {
+    for (dx=0; dx < thickness; dx++)
+    {
+      psplash_fb_plot_pixel (fb, x+dx, y+dy, red, green, blue);
+      psplash_fb_plot_pixel (fb, x+width-dx-1, y+dy, red, green, blue);
+    }
+  }
+
+  /* Horizontal */
+  for (dx=thickness; dx < (width - thickness); dx++)
+  {
+    for (dy=0; dy < thickness; dy++)
+    {
+      psplash_fb_plot_pixel (fb, x+dx, y+dy, red, green, blue);
+      psplash_fb_plot_pixel (fb, x+dx, y+height-dy-1, red, green, blue);
+    }
+  }
+}
+
+void
 psplash_fb_draw_image (PSplashFB    *fb,
 		       int          x,
 		       int          y,

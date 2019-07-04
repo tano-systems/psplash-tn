@@ -31,4 +31,10 @@
 /* This is the color of the progress bar background */
 #define PSPLASH_BAR_BACKGROUND_COLOR 0xec,0xec,0xe1
 
+/* This is the color of the progress bar border */
+#define PSPLASH_BAR_BORDER_COLOR 0xff,0xff,0xff
+
+/* This is the color of the space between progress bar and its border */
+#define PSPLASH_BAR_BORDER_SPACE_COLOR 0x00,0x00,0x00
+
 #endif
