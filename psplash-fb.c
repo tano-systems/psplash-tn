@@ -510,6 +510,8 @@ psplash_fb_draw_text (PSplashFB         *fb,
   char   *c = (char*)text;
   wchar_t wc;
 
+  if (!text) return;
+
   n = strlen (text);
   h = font->height;
   dx = dy = 0;

@@ -47,7 +47,7 @@ psplash_draw_msg (PSplashFB *fb, const char *msg)
 
   psplash_fb_text_size (&w, &h, &radeon_font, msg);
 
-  DBG("displaying '%s' %ix%i\n", msg, w, h);
+  DBG("displaying '%s' %ix%i\n", msg ? msg : "(null)", w, h);
 
   /* Clear */
 
@@ -306,7 +306,8 @@ main (int argc, char** argv)
   psplash_draw_progress (fb, 0);
 
 #ifdef PSPLASH_STARTUP_MSG
-  psplash_draw_msg (fb, PSPLASH_STARTUP_MSG);
+  if (strlen(PSPLASH_STARTUP_MSG))
+      psplash_draw_msg (fb, PSPLASH_STARTUP_MSG);
 #endif
 
   psplash_main (fb, pipe_fd, 0);
