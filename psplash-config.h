@@ -23,7 +23,7 @@
 #define PSPLASH_STARTUP_MSG ""
 
 /* Bool indicating if the image is fullscreen, as opposed to split screen */
-#define PSPLASH_IMG_FULLSCREEN 0
+#define PSPLASH_IMG_FULLSCREEN 1
 
 /* Position of the image split from top edge, numerator of fraction */
 #define PSPLASH_IMG_SPLIT_NUMERATOR 5
@@ -35,15 +35,15 @@
 #define PSPLASH_MSG_PADDING 4
 
 /* Progress bar width (in pixels) */
-#define PSPLASH_BAR_WIDTH 230
+#define PSPLASH_BAR_WIDTH 340
 
 /* Progress bar height (in pixels) */
-#define PSPLASH_BAR_HEIGHT 28
+#define PSPLASH_BAR_HEIGHT 30
 
 /* Progress bar border thickness (in pixels) */
 #define PSPLASH_BAR_BORDER_WIDTH 2
 
 /* Size in pixels between progress bar and its border */
-#define PSPLASH_BAR_BORDER_SPACE 1
+#define PSPLASH_BAR_BORDER_SPACE 2
 
 #endif
