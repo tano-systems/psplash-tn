@@ -1,5 +1,5 @@
-/* 
- *  pslash - a lightweight framebuffer splashscreen for embedded devices. 
+/*
+ *  pslash - a lightweight framebuffer splashscreen for embedded devices.
  *
  *  Copyright (c) 2006 Matthew Allum <mallum@o-hand.com>
  *
@@ -27,7 +27,7 @@
 #include <errno.h>
 #include "psplash.h"
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
   char *tmpdir;
   int   pipe_fd;
@@ -37,17 +37,17 @@ int main(int argc, char **argv)
   if (!tmpdir)
     tmpdir = "/tmp";
 
-  if (argc!=2) 
+  if (argc!=2)
     {
       fprintf(stderr, "Wrong number of arguments\n");
       exit(-1);
     }
-  
+
   chdir(tmpdir);
-  
+
   if ((pipe_fd = open (PSPLASH_FIFO,O_WRONLY|O_NONBLOCK)) == -1)
     {
-      /* Silently error out instead of covering the boot process in 
+      /* Silently error out instead of covering the boot process in
          errors when psplash has exitted due to a VC switch */
       /* perror("Error unable to open fifo"); */
       exit (-1);

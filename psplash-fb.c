@@ -201,11 +201,11 @@ psplash_fb_new (int angle, int fbdev_id)
       fb->width, fb->height, fb->bpp, fb->stride);
 
   fb->base = (char *) mmap ((caddr_t) NULL,
-			    /*fb_fix.smem_len */
-			    fb->stride * fb->height,
-			    PROT_READ|PROT_WRITE,
-			    MAP_SHARED,
-			    fb->fd, 0);
+                            /*fb_fix.smem_len */
+                            fb->stride * fb->height,
+                            PROT_READ|PROT_WRITE,
+                            MAP_SHARED,
+                            fb->fd, 0);
 
   if (fb->base == (char *)-1)
     {
@@ -268,11 +268,11 @@ psplash_fb_new (int angle, int fbdev_id)
 
 static inline void
 psplash_fb_plot_pixel (PSplashFB    *fb,
-		       int          x,
-		       int          y,
-		       uint8        red,
-		       uint8        green,
-		       uint8        blue)
+                       int          x,
+                       int          y,
+                       uint8        red,
+                       uint8        green,
+                       uint8        blue)
 {
   int off;
 
@@ -317,7 +317,7 @@ psplash_fb_plot_pixel (PSplashFB    *fb,
 
       case 16:
         *(volatile uint16_t *) (fb->data + off)
-	  = ((red >> 3) << 11) | ((green >> 2) << 5) | (blue >> 3);
+          = ((red >> 3) << 11) | ((green >> 2) << 5) | (blue >> 3);
         break;
       default:
         /* depth not supported yet */
@@ -343,7 +343,7 @@ psplash_fb_plot_pixel (PSplashFB    *fb,
         break;
       case 16:
         *(volatile uint16_t *) (fb->data + off)
-	  = ((blue >> 3) << 11) | ((green >> 2) << 5) | (red >> 3);
+          = ((blue >> 3) << 11) | ((green >> 2) << 5) | (red >> 3);
         break;
       default:
         /* depth not supported yet */
@@ -354,15 +354,15 @@ psplash_fb_plot_pixel (PSplashFB    *fb,
       {
       case 32:
         *(volatile uint32_t *) (fb->data + off)
-	  = ((red >> (8 - fb->red_length)) << fb->red_offset) 
-	      | ((green >> (8 - fb->green_length)) << fb->green_offset)
-	      | ((blue >> (8 - fb->blue_length)) << fb->blue_offset);
+          = ((red >> (8 - fb->red_length)) << fb->red_offset)
+              | ((green >> (8 - fb->green_length)) << fb->green_offset)
+              | ((blue >> (8 - fb->blue_length)) << fb->blue_offset);
         break;
       case 16:
         *(volatile uint16_t *) (fb->data + off)
-	  = ((red >> (8 - fb->red_length)) << fb->red_offset) 
-	      | ((green >> (8 - fb->green_length)) << fb->green_offset)
-	      | ((blue >> (8 - fb->blue_length)) << fb->blue_offset);
+          = ((red >> (8 - fb->red_length)) << fb->red_offset)
+              | ((green >> (8 - fb->green_length)) << fb->green_offset)
+              | ((blue >> (8 - fb->blue_length)) << fb->blue_offset);
         break;
       default:
         /* depth not supported yet */
@@ -373,31 +373,31 @@ psplash_fb_plot_pixel (PSplashFB    *fb,
 
 void
 psplash_fb_draw_rect (PSplashFB    *fb,
-		      int          x,
-		      int          y,
-		      int          width,
-		      int          height,
-		      uint8        red,
-		      uint8        green,
-		      uint8        blue)
+                      int          x,
+                      int          y,
+                      int          width,
+                      int          height,
+                      uint8        red,
+                      uint8        green,
+                      uint8        blue)
 {
   int dx, dy;
 
   for (dy=0; dy < height; dy++)
     for (dx=0; dx < width; dx++)
-	psplash_fb_plot_pixel (fb, x+dx, y+dy, red, green, blue);
+        psplash_fb_plot_pixel (fb, x+dx, y+dy, red, green, blue);
 }
 
 void
-psplash_fb_draw_box (PSplashFB    *fb, 
-		      int          x, 
-		      int          y, 
-		      int          width, 
-		      int          height,
-		      int          thickness,
-		      uint8        red,
-		      uint8        green,
-		      uint8        blue)
+psplash_fb_draw_box (PSplashFB    *fb,
+                      int          x,
+                      int          y,
+                      int          width,
+                      int          height,
+                      int          thickness,
+                      uint8        red,
+                      uint8        green,
+                      uint8        blue)
 {
   int dx, dy;
 
@@ -406,34 +406,34 @@ psplash_fb_draw_box (PSplashFB    *fb,
 
   /* Vertical */
   for (dy=0; dy < height; dy++)
-  {
-    for (dx=0; dx < thickness; dx++)
     {
-      psplash_fb_plot_pixel (fb, x+dx, y+dy, red, green, blue);
-      psplash_fb_plot_pixel (fb, x+width-dx-1, y+dy, red, green, blue);
+      for (dx=0; dx < thickness; dx++)
+        {
+          psplash_fb_plot_pixel (fb, x+dx, y+dy, red, green, blue);
+          psplash_fb_plot_pixel (fb, x+width-dx-1, y+dy, red, green, blue);
+        }
     }
-  }
 
   /* Horizontal */
   for (dx=thickness; dx < (width - thickness); dx++)
-  {
-    for (dy=0; dy < thickness; dy++)
     {
-      psplash_fb_plot_pixel (fb, x+dx, y+dy, red, green, blue);
-      psplash_fb_plot_pixel (fb, x+dx, y+height-dy-1, red, green, blue);
+      for (dy=0; dy < thickness; dy++)
+        {
+          psplash_fb_plot_pixel (fb, x+dx, y+dy, red, green, blue);
+          psplash_fb_plot_pixel (fb, x+dx, y+height-dy-1, red, green, blue);
+        }
     }
-  }
 }
 
 void
 psplash_fb_draw_image (PSplashFB    *fb,
-		       int          x,
-		       int          y,
-		       int          img_width,
-		       int          img_height,
-		       int          img_bytes_per_pixel,
-		       int          img_rowstride,
-		       uint8       *rle_data)
+                       int          x,
+                       int          y,
+                       int          img_width,
+                       int          img_height,
+                       int          img_bytes_per_pixel,
+                       int          img_rowstride,
+                       uint8       *rle_data)
 {
   uint8       *p = rle_data;
   int          dx = 0, dy = 0,  total_len;
@@ -447,34 +447,34 @@ psplash_fb_draw_image (PSplashFB    *fb,
       len = *(p++);
 
       if (len & 128)
-	{
-	  len -= 128;
+        {
+          len -= 128;
 
-	  if (len == 0) break;
+          if (len == 0) break;
 
-	  do
-	    {
-	      if ((img_bytes_per_pixel < 4 || *(p+3)) && dx < img_width)
-	        psplash_fb_plot_pixel (fb, x+dx, y+dy, *(p), *(p+1), *(p+2));
-	      if (++dx * img_bytes_per_pixel >= img_rowstride) { dx=0; dy++; }
-	    }
-	  while (--len);
+          do
+            {
+              if ((img_bytes_per_pixel < 4 || *(p+3)) && dx < img_width)
+                psplash_fb_plot_pixel (fb, x+dx, y+dy, *(p), *(p+1), *(p+2));
+              if (++dx * img_bytes_per_pixel >= img_rowstride) { dx=0; dy++; }
+            }
+          while (--len);
 
-	  p += img_bytes_per_pixel;
-	}
+          p += img_bytes_per_pixel;
+        }
       else
-	{
-	  if (len == 0) break;
+        {
+          if (len == 0) break;
 
-	  do
-	    {
-	      if ((img_bytes_per_pixel < 4 || *(p+3)) && dx < img_width)
-	        psplash_fb_plot_pixel (fb, x+dx, y+dy, *(p), *(p+1), *(p+2));
-	      if (++dx * img_bytes_per_pixel >= img_rowstride) { dx=0; dy++; }
-	      p += img_bytes_per_pixel;
-	    }
-	  while (--len && (p - rle_data) < total_len);
-	}
+          do
+            {
+              if ((img_bytes_per_pixel < 4 || *(p+3)) && dx < img_width)
+                psplash_fb_plot_pixel (fb, x+dx, y+dy, *(p), *(p+1), *(p+2));
+              if (++dx * img_bytes_per_pixel >= img_rowstride) { dx=0; dy++; }
+              p += img_bytes_per_pixel;
+            }
+          while (--len && (p - rle_data) < total_len);
+        }
     }
 }
 
@@ -489,23 +489,23 @@ psplash_font_glyph (const PSplashFont *font, wchar_t wc, u_int32_t **bitmap)
   for (;;)
     {
       for (i = font->offset[wc & mask]; font->index[i]; i += 2)
-	{
-	  if ((wchar_t)(font->index[i] & ~mask) == (wc & ~mask))
-	    {
-	      if (bitmap != NULL)
-		*bitmap = &font->content[font->index[i+1]];
-	      return font->index[i] & mask;
-	    }
-	}
+        {
+          if ((wchar_t)(font->index[i] & ~mask) == (wc & ~mask))
+            {
+              if (bitmap != NULL)
+                *bitmap = &font->content[font->index[i+1]];
+              return font->index[i] & mask;
+            }
+        }
     }
   return 0;
 }
 
 void
 psplash_fb_text_size (int                *width,
-		      int                *height,
-		      const PSplashFont  *font,
-		      const char         *text)
+                      int                *height,
+                      const PSplashFont  *font,
+                      const char         *text)
 {
   char   *c = (char*)text;
   wchar_t wc;
@@ -518,13 +518,13 @@ psplash_fb_text_size (int                *width,
   for (; (k = mbtowc (&wc, c, n)) > 0; c += k, n -= k)
     {
       if (*c == '\n')
-	{
-	  if (w > mw)
-	    mw = w;
-	  w = 0;
-	  h += font->height;
-	  continue;
-	}
+        {
+          if (w > mw)
+            mw = w;
+          w = 0;
+          h += font->height;
+          continue;
+        }
 
       w += psplash_font_glyph (font, wc, NULL);
     }
@@ -535,13 +535,13 @@ psplash_fb_text_size (int                *width,
 
 void
 psplash_fb_draw_text (PSplashFB         *fb,
-		      int                x,
-		      int                y,
-		      uint8              red,
-		      uint8              green,
-		      uint8              blue,
-		      const PSplashFont *font,
-		      const char        *text)
+                      int                x,
+                      int                y,
+                      uint8              red,
+                      uint8              green,
+                      uint8              blue,
+                      const PSplashFont *font,
+                      const char        *text)
 {
   int     h, w, k, n, cx, cy, dx, dy;
   char   *c = (char*)text;
@@ -559,29 +559,29 @@ psplash_fb_draw_text (PSplashFB         *fb,
       u_int32_t *glyph = NULL;
 
       if (*c == '\n')
-	{
-	  dy += h;
-	  dx  = 0;
-	  continue;
-	}
+        {
+          dy += h;
+          dx  = 0;
+          continue;
+        }
 
       w = psplash_font_glyph (font, wc, &glyph);
 
       if (glyph == NULL)
-	continue;
+        continue;
 
       for (cy = 0; cy < h; cy++)
-	{
-	  u_int32_t g = *glyph++;
+        {
+          u_int32_t g = *glyph++;
 
-	  for (cx = 0; cx < w; cx++)
-	    {
-	      if (g & 0x80000000)
-		psplash_fb_plot_pixel (fb, x+dx+cx, y+dy+cy,
-				       red, green, blue);
-	      g <<= 1;
-	    }
-	}
+          for (cx = 0; cx < w; cx++)
+            {
+              if (g & 0x80000000)
+                psplash_fb_plot_pixel (fb, x+dx+cx, y+dy+cy,
+                                       red, green, blue);
+              g <<= 1;
+            }
+        }
 
       dx += w;
     }
