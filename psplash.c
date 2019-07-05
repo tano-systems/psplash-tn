@@ -130,7 +130,7 @@ psplash_draw_progress_border(PSplashFB *fb)
 }
 
 static int 
-parse_command (PSplashFB *fb, char *string)
+parse_single_command (PSplashFB *fb, char *string)
 {
   char *command;
 
@@ -153,6 +153,27 @@ parse_command (PSplashFB *fb, char *string)
     {
       return 1;
     }
+
+  return 0;
+}
+
+static int 
+parse_commands (PSplashFB *fb, char *string, int len)
+{
+  int i;
+  char *command = string;
+
+  for (i = 0; i < len; i++)
+  {
+    if ((string[i] == 0) || (string[i] == '\n'))
+    {
+      string[i] = 0;
+      if (parse_single_command(fb, command))
+        return 1;
+
+      command = &string[i + 1];
+    }
+  }
 
   return 0;
 }
@@ -203,14 +224,14 @@ psplash_main (PSplashFB *fb, int pipe_fd, int timeout)
       
       if (command[length-1] == '\0') 
 	{
-	  if (parse_command(fb, command))
+	  if (parse_commands(fb, command, length))
 	    return;
 	  length = 0;
 	} 
       else if (command[length-1] == '\n') 
 	{
 	  command[length-1] = '\0';
-	  if (parse_command(fb, command))
+	  if (parse_commands(fb, command, length))
 	    return;
 	  length = 0;
 	} 
