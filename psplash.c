@@ -57,12 +57,15 @@ psplash_draw_msg (PSplashFB *fb, const char *msg)
                         h,
                         PSPLASH_BACKGROUND_COLOR);
 
-  psplash_fb_draw_text (fb,
+  if (msg)
+    {
+      psplash_fb_draw_text (fb,
                         (fb->width-w)/2,
                         SPLIT_LINE_POS(fb) - h - PSPLASH_MSG_PADDING,
                         PSPLASH_TEXT_COLOR,
                         &font,
                         msg);
+    }
 }
 
 void

@@ -511,6 +511,13 @@ psplash_fb_text_size (int                *width,
   wchar_t wc;
   int     k, n, w, h, mw;
 
+  if (!text)
+    {
+      *height = font->height;
+      *width = 0;
+      return;
+    }
+
   n = strlen (text);
   mw = h = w = 0;
 
