@@ -282,13 +282,13 @@ psplash_fb_plot_pixel (PSplashFB    *fb,
   switch (fb->angle)
     {
     case 270:
-      off = OFFSET (fb, fb->height - y - 1, x);
+      off = OFFSET (fb, y, fb->width - x - 1);
       break;
     case 180:
       off = OFFSET (fb, fb->width - x - 1, fb->height - y - 1);
       break;
     case 90:
-      off = OFFSET (fb, y, fb->width - x - 1);
+      off = OFFSET (fb, fb->height - y - 1, x);
       break;
     case 0:
     default:
