@@ -24,347 +24,338 @@
 #include "psplash-poky-img.h"
 #include "font.h"
 
-#define SPLIT_LINE_POS(fb)                                  \
-        (  (fb)->height                                     \
-         - ((  PSPLASH_IMG_SPLIT_DENOMINATOR                \
-             - PSPLASH_IMG_SPLIT_NUMERATOR)                 \
-            * (fb)->height / PSPLASH_IMG_SPLIT_DENOMINATOR) \
-        )
+#define SPLIT_LINE_POS(fb)                                                           \
+	((fb)->height - ((PSPLASH_IMG_SPLIT_DENOMINATOR - PSPLASH_IMG_SPLIT_NUMERATOR) * \
+					 (fb)->height / PSPLASH_IMG_SPLIT_DENOMINATOR))
 
-void
-psplash_exit (int UNUSED(signum))
+void psplash_exit(int UNUSED(signum))
 {
-  DBG("mark");
+	DBG("mark");
 
-  psplash_console_reset ();
+	psplash_console_reset();
 }
 
-void
-psplash_draw_msg (PSplashFB *fb, const char *msg)
+void psplash_draw_msg(PSplashFB *fb, const char *msg)
 {
-  int w, h;
+	int w, h;
 
-  psplash_fb_text_size (&w, &h, &font, msg);
+	psplash_fb_text_size(&w, &h, &font, msg);
 
-  DBG("displaying '%s' %ix%i\n", msg ? msg : "(null)", w, h);
+	DBG("displaying '%s' %ix%i\n", msg ? msg : "(null)", w, h);
 
-  /* Clear */
+	/* Clear */
 
-  psplash_fb_draw_rect (fb,
-                        0,
-                        SPLIT_LINE_POS(fb) - h - PSPLASH_MSG_PADDING,
-                        fb->width,
-                        h,
-                        PSPLASH_BACKGROUND_COLOR);
+	psplash_fb_draw_rect(
+		fb,
+		0,
+		SPLIT_LINE_POS(fb) - h - PSPLASH_MSG_PADDING,
+		fb->width,
+		h,
+		PSPLASH_BACKGROUND_COLOR);
 
-  if (msg)
-    {
-      psplash_fb_draw_text (fb,
-                        (fb->width-w)/2,
-                        SPLIT_LINE_POS(fb) - h - PSPLASH_MSG_PADDING,
-                        PSPLASH_TEXT_COLOR,
-                        &font,
-                        msg);
-    }
+	if (msg)
+	{
+		psplash_fb_draw_text(
+			fb,
+			(fb->width - w) / 2,
+			SPLIT_LINE_POS(fb) - h - PSPLASH_MSG_PADDING,
+			PSPLASH_TEXT_COLOR,
+			&font,
+			msg);
+	}
 }
 
-void
-psplash_draw_progress (PSplashFB *fb, int value)
+void psplash_draw_progress(PSplashFB *fb, int value)
 {
-  int x, y, width, height, barwidth;
-  int padding = PSPLASH_BAR_BORDER_WIDTH + PSPLASH_BAR_BORDER_SPACE;
+	int x, y, width, height, barwidth;
+	int padding = PSPLASH_BAR_BORDER_WIDTH + PSPLASH_BAR_BORDER_SPACE;
 
-  x = ((fb->width - PSPLASH_BAR_WIDTH)/2) + padding;
-  y = SPLIT_LINE_POS(fb) + padding;
+	x = ((fb->width - PSPLASH_BAR_WIDTH) / 2) + padding;
+	y = SPLIT_LINE_POS(fb) + padding;
 
-  width  = PSPLASH_BAR_WIDTH - padding * 2;
-  height = PSPLASH_BAR_HEIGHT - padding * 2;
+	width  = PSPLASH_BAR_WIDTH - padding * 2;
+	height = PSPLASH_BAR_HEIGHT - padding * 2;
 
-  if (value > 0)
-    {
-      barwidth = (CLAMP(value,0,100) * width) / 100;
-      psplash_fb_draw_rect (fb, x + barwidth, y,
-                        width - barwidth, height,
-                        PSPLASH_BAR_BACKGROUND_COLOR);
-      psplash_fb_draw_rect (fb, x, y, barwidth,
-                            height, PSPLASH_BAR_COLOR);
-    }
-  else
-    {
-      barwidth = (CLAMP(-value,0,100) * width) / 100;
-      psplash_fb_draw_rect (fb, x, y,
-                        width - barwidth, height,
-                        PSPLASH_BAR_BACKGROUND_COLOR);
-      psplash_fb_draw_rect (fb, x + width - barwidth,
-                            y, barwidth, height,
-                            PSPLASH_BAR_COLOR);
-    }
+	if (value > 0)
+	{
+		barwidth = (CLAMP(value, 0, 100) * width) / 100;
+		psplash_fb_draw_rect(
+			fb, x + barwidth, y, width - barwidth, height, PSPLASH_BAR_BACKGROUND_COLOR);
+		psplash_fb_draw_rect(fb, x, y, barwidth, height, PSPLASH_BAR_COLOR);
+	}
+	else
+	{
+		barwidth = (CLAMP(-value, 0, 100) * width) / 100;
+		psplash_fb_draw_rect(fb, x, y, width - barwidth, height, PSPLASH_BAR_BACKGROUND_COLOR);
+		psplash_fb_draw_rect(fb, x + width - barwidth, y, barwidth, height, PSPLASH_BAR_COLOR);
+	}
 
-  DBG("value: %i, width: %i, barwidth :%i\n", value,
-                width, barwidth);
+	DBG("value: %i, width: %i, barwidth :%i\n", value, width, barwidth);
 }
 
-void
-psplash_draw_progress_border(PSplashFB *fb)
+void psplash_draw_progress_border(PSplashFB *fb)
 {
-  int x = (fb->width  - PSPLASH_BAR_WIDTH)/2;
-  int y = SPLIT_LINE_POS(fb);
+	int x = (fb->width - PSPLASH_BAR_WIDTH) / 2;
+	int y = SPLIT_LINE_POS(fb);
 
 #if PSPLASH_BAR_BORDER_WIDTH > 0
-  /* border */
-  psplash_fb_draw_box(fb,
-    x, y,
-    PSPLASH_BAR_WIDTH,
-    PSPLASH_BAR_HEIGHT,
-    PSPLASH_BAR_BORDER_WIDTH,
-    PSPLASH_BAR_BORDER_COLOR);
+	/* border */
+	psplash_fb_draw_box(
+		fb,
+		x,
+		y,
+		PSPLASH_BAR_WIDTH,
+		PSPLASH_BAR_HEIGHT,
+		PSPLASH_BAR_BORDER_WIDTH,
+		PSPLASH_BAR_BORDER_COLOR);
 
 #if PSPLASH_BAR_BORDER_SPACE > 0
-  /* border space */
-  psplash_fb_draw_box(fb,
-    x + PSPLASH_BAR_BORDER_WIDTH,
-    y + PSPLASH_BAR_BORDER_WIDTH,
-    PSPLASH_BAR_WIDTH - PSPLASH_BAR_BORDER_WIDTH * 2,
-    PSPLASH_BAR_HEIGHT - PSPLASH_BAR_BORDER_WIDTH * 2,
-    PSPLASH_BAR_BORDER_SPACE,
-    PSPLASH_BAR_BORDER_SPACE_COLOR);
+	/* border space */
+	psplash_fb_draw_box(
+		fb,
+		x + PSPLASH_BAR_BORDER_WIDTH,
+		y + PSPLASH_BAR_BORDER_WIDTH,
+		PSPLASH_BAR_WIDTH - PSPLASH_BAR_BORDER_WIDTH * 2,
+		PSPLASH_BAR_HEIGHT - PSPLASH_BAR_BORDER_WIDTH * 2,
+		PSPLASH_BAR_BORDER_SPACE,
+		PSPLASH_BAR_BORDER_SPACE_COLOR);
 #endif
 #endif
 }
 
-static int
-parse_single_command (PSplashFB *fb, char *string)
+static int parse_single_command(PSplashFB *fb, char *string)
 {
-  char *command;
+	char *command;
 
-  DBG("got cmd %s", string);
+	DBG("got cmd %s", string);
 
-  if (strcmp(string,"QUIT") == 0)
-    return 1;
+	if (strcmp(string, "QUIT") == 0)
+		return 1;
 
-  command = strtok(string," ");
+	command = strtok(string, " ");
 
-  if (!strcmp(command,"PROGRESS"))
-    {
-      psplash_draw_progress (fb, atoi(strtok(NULL,"\0")));
-    }
-  else if (!strcmp(command,"MSG"))
-    {
-      psplash_draw_msg (fb, strtok(NULL,"\0"));
-    }
-  else if (!strcmp(command,"QUIT"))
-    {
-      return 1;
-    }
+	if (!strcmp(command, "PROGRESS"))
+	{
+		psplash_draw_progress(fb, atoi(strtok(NULL, "\0")));
+	}
+	else if (!strcmp(command, "MSG"))
+	{
+		psplash_draw_msg(fb, strtok(NULL, "\0"));
+	}
+	else if (!strcmp(command, "QUIT"))
+	{
+		return 1;
+	}
 
-  return 0;
+	return 0;
 }
 
-static int
-parse_commands (PSplashFB *fb, char *string, int len)
+static int parse_commands(PSplashFB *fb, char *string, int len)
 {
-  int i;
-  char *command = string;
+	int   i;
+	char *command = string;
 
-  for (i = 0; i < len; i++)
-    {
-      if ((string[i] == 0) || (string[i] == '\n'))
-        {
-          string[i] = 0;
-          if (parse_single_command(fb, command))
-            return 1;
+	for (i = 0; i < len; i++)
+	{
+		if ((string[i] == 0) || (string[i] == '\n'))
+		{
+			string[i] = 0;
+			if (parse_single_command(fb, command))
+				return 1;
 
-          command = &string[i + 1];
-        }
-    }
+			command = &string[i + 1];
+		}
+	}
 
-  return 0;
+	return 0;
 }
 
-void
-psplash_main (PSplashFB *fb, int pipe_fd, int timeout)
+void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 {
-  int            err;
-  ssize_t        length = 0;
-  fd_set         descriptors;
-  struct timeval tv;
-  char          *end;
-  char           command[2048];
+	int            err;
+	ssize_t        length = 0;
+	fd_set         descriptors;
+	struct timeval tv;
+	char *         end;
+	char           command[2048];
 
-  tv.tv_sec = timeout;
-  tv.tv_usec = 0;
+	tv.tv_sec  = timeout;
+	tv.tv_usec = 0;
 
-  FD_ZERO(&descriptors);
-  FD_SET(pipe_fd, &descriptors);
+	FD_ZERO(&descriptors);
+	FD_SET(pipe_fd, &descriptors);
 
-  end = command;
+	end = command;
 
-  while (1)
-    {
-      if (timeout != 0)
-        err = select(pipe_fd+1, &descriptors, NULL, NULL, &tv);
-      else
-        err = select(pipe_fd+1, &descriptors, NULL, NULL, NULL);
+	while (1)
+	{
+		if (timeout != 0)
+			err = select(pipe_fd + 1, &descriptors, NULL, NULL, &tv);
+		else
+			err = select(pipe_fd + 1, &descriptors, NULL, NULL, NULL);
 
-      if (err <= 0)
-        {
-          /*
-          if (errno == EINTR)
-            continue;
-          */
-          return;
-        }
+		if (err <= 0)
+		{
+			/*
+			if (errno == EINTR)
+			  continue;
+			*/
+			return;
+		}
 
-      length += read (pipe_fd, end, sizeof(command) - (end - command));
+		length += read(pipe_fd, end, sizeof(command) - (end - command));
 
-      if (length == 0)
-        {
-          /* Reopen to see if there's anything more for us */
-          close(pipe_fd);
-          pipe_fd = open(PSPLASH_FIFO,O_RDONLY|O_NONBLOCK);
-          goto out;
-        }
+		if (length == 0)
+		{
+			/* Reopen to see if there's anything more for us */
+			close(pipe_fd);
+			pipe_fd = open(PSPLASH_FIFO, O_RDONLY | O_NONBLOCK);
+			goto out;
+		}
 
-      if (command[length-1] == '\0')
-        {
-          if (parse_commands(fb, command, length))
-            return;
-          length = 0;
-        }
-      else if (command[length-1] == '\n')
-        {
-          command[length-1] = '\0';
-          if (parse_commands(fb, command, length))
-            return;
-          length = 0;
-        }
+		if (command[length - 1] == '\0')
+		{
+			if (parse_commands(fb, command, length))
+				return;
+			length = 0;
+		}
+		else if (command[length - 1] == '\n')
+		{
+			command[length - 1] = '\0';
+			if (parse_commands(fb, command, length))
+				return;
+			length = 0;
+		}
 
+	out:
+		end = &command[length];
 
-    out:
-      end = &command[length];
+		tv.tv_sec  = timeout;
+		tv.tv_usec = 0;
 
-      tv.tv_sec = timeout;
-      tv.tv_usec = 0;
+		FD_ZERO(&descriptors);
+		FD_SET(pipe_fd, &descriptors);
+	}
 
-      FD_ZERO(&descriptors);
-      FD_SET(pipe_fd,&descriptors);
-    }
-
-  return;
+	return;
 }
 
-int
-main (int argc, char** argv)
+int main(int argc, char **argv)
 {
-  char      *tmpdir;
-  int        pipe_fd, i = 0, angle = 0, fbdev_id = 0, ret = 0;
-  PSplashFB *fb;
-  bool       disable_console_switch = FALSE;
+	char *     tmpdir;
+	int        pipe_fd, i = 0, angle = 0, fbdev_id = 0, ret = 0;
+	PSplashFB *fb;
+	bool       disable_console_switch = FALSE;
 
-  signal(SIGHUP, psplash_exit);
-  signal(SIGINT, psplash_exit);
-  signal(SIGQUIT, psplash_exit);
+	signal(SIGHUP, psplash_exit);
+	signal(SIGINT, psplash_exit);
+	signal(SIGQUIT, psplash_exit);
 
-  while (++i < argc) {
-    if (!strcmp(argv[i],"-n") || !strcmp(argv[i],"--no-console-switch"))
-      {
-        disable_console_switch = TRUE;
-        continue;
-      }
+	while (++i < argc)
+	{
+		if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "--no-console-switch"))
+		{
+			disable_console_switch = TRUE;
+			continue;
+		}
 
-    if (!strcmp(argv[i],"-a") || !strcmp(argv[i],"--angle"))
-      {
-        if (++i >= argc) goto fail;
-        angle = atoi(argv[i]);
-        continue;
-      }
+		if (!strcmp(argv[i], "-a") || !strcmp(argv[i], "--angle"))
+		{
+			if (++i >= argc)
+				goto fail;
+			angle = atoi(argv[i]);
+			continue;
+		}
 
-    if (!strcmp(argv[i],"-f") || !strcmp(argv[i],"--fbdev"))
-      {
-        if (++i >= argc) goto fail;
-        fbdev_id = atoi(argv[i]);
-        continue;
-      }
+		if (!strcmp(argv[i], "-f") || !strcmp(argv[i], "--fbdev"))
+		{
+			if (++i >= argc)
+				goto fail;
+			fbdev_id = atoi(argv[i]);
+			continue;
+		}
 
-    fail:
-      fprintf(stderr,
-              "Usage: %s [-n|--no-console-switch][-a|--angle <0|90|180|270>][-f|--fbdev <0..9>]\n",
-              argv[0]);
-      exit(-1);
-  }
+	fail:
+		fprintf(
+			stderr,
+			"Usage: %s [-n|--no-console-switch][-a|--angle <0|90|180|270>][-f|--fbdev <0..9>]\n",
+			argv[0]);
+		exit(-1);
+	}
 
-  tmpdir = getenv("TMPDIR");
+	tmpdir = getenv("TMPDIR");
 
-  if (!tmpdir)
-    tmpdir = "/tmp";
+	if (!tmpdir)
+		tmpdir = "/tmp";
 
-  chdir(tmpdir);
+	chdir(tmpdir);
 
-  if (mkfifo(PSPLASH_FIFO, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP))
-    {
-      if (errno!=EEXIST)
-            {
-              perror("mkfifo");
-              exit(-1);
-            }
-    }
+	if (mkfifo(PSPLASH_FIFO, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP))
+	{
+		if (errno != EEXIST)
+		{
+			perror("mkfifo");
+			exit(-1);
+		}
+	}
 
-  pipe_fd = open (PSPLASH_FIFO,O_RDONLY|O_NONBLOCK);
+	pipe_fd = open(PSPLASH_FIFO, O_RDONLY | O_NONBLOCK);
 
-  if (pipe_fd==-1)
-    {
-      perror("pipe open");
-      exit(-2);
-    }
+	if (pipe_fd == -1)
+	{
+		perror("pipe open");
+		exit(-2);
+	}
 
-  if (!disable_console_switch)
-    psplash_console_switch ();
+	if (!disable_console_switch)
+		psplash_console_switch();
 
-  if ((fb = psplash_fb_new(angle,fbdev_id)) == NULL)
-    {
-          ret = -1;
-          goto fb_fail;
-    }
+	if ((fb = psplash_fb_new(angle, fbdev_id)) == NULL)
+	{
+		ret = -1;
+		goto fb_fail;
+	}
 
-  /* Clear the background with #ecece1 */
-  psplash_fb_draw_rect (fb, 0, 0, fb->width, fb->height,
-                        PSPLASH_BACKGROUND_COLOR);
+	/* Clear the background with #ecece1 */
+	psplash_fb_draw_rect(fb, 0, 0, fb->width, fb->height, PSPLASH_BACKGROUND_COLOR);
 
-  /* Draw the Poky logo  */
-  psplash_fb_draw_image (fb,
-                         (fb->width  - POKY_IMG_WIDTH)/2,
+	/* Draw the Poky logo  */
+	psplash_fb_draw_image(
+		fb,
+		(fb->width - POKY_IMG_WIDTH) / 2,
 #if PSPLASH_IMG_FULLSCREEN
-                         (fb->height - POKY_IMG_HEIGHT)/2,
+		(fb->height - POKY_IMG_HEIGHT) / 2,
 #else
-                         (fb->height * PSPLASH_IMG_SPLIT_NUMERATOR
-                          / PSPLASH_IMG_SPLIT_DENOMINATOR - POKY_IMG_HEIGHT)/2,
+		(fb->height * PSPLASH_IMG_SPLIT_NUMERATOR / PSPLASH_IMG_SPLIT_DENOMINATOR -
+		 POKY_IMG_HEIGHT) /
+			2,
 #endif
-                         POKY_IMG_WIDTH,
-                         POKY_IMG_HEIGHT,
-                         POKY_IMG_BYTES_PER_PIXEL,
-                         POKY_IMG_ROWSTRIDE,
-                         POKY_IMG_RLE_PIXEL_DATA);
+		POKY_IMG_WIDTH,
+		POKY_IMG_HEIGHT,
+		POKY_IMG_BYTES_PER_PIXEL,
+		POKY_IMG_ROWSTRIDE,
+		POKY_IMG_RLE_PIXEL_DATA);
 
-  /* Draw progress bar border */
-  psplash_draw_progress_border(fb);
+	/* Draw progress bar border */
+	psplash_draw_progress_border(fb);
 
-  /* Draw initial progress bar */
-  psplash_draw_progress (fb, 0);
+	/* Draw initial progress bar */
+	psplash_draw_progress(fb, 0);
 
 #ifdef PSPLASH_STARTUP_MSG
-  if (strlen(PSPLASH_STARTUP_MSG))
-      psplash_draw_msg (fb, PSPLASH_STARTUP_MSG);
+	if (strlen(PSPLASH_STARTUP_MSG))
+		psplash_draw_msg(fb, PSPLASH_STARTUP_MSG);
 #endif
 
-  psplash_main (fb, pipe_fd, 0);
+	psplash_main(fb, pipe_fd, 0);
 
-  psplash_fb_destroy (fb);
+	psplash_fb_destroy(fb);
 
- fb_fail:
-  unlink(PSPLASH_FIFO);
+fb_fail:
+	unlink(PSPLASH_FIFO);
 
-  if (!disable_console_switch)
-    psplash_console_reset ();
+	if (!disable_console_switch)
+		psplash_console_reset();
 
-  return ret;
+	return ret;
 }
