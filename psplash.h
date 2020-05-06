@@ -43,6 +43,8 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include <libubox/ulog.h>
+
 typedef uint8_t  uint8;
 typedef uint16_t uint16;
 typedef int bool;
@@ -59,13 +61,8 @@ typedef int bool;
 
 #define CLAMP(x, low, high) (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
+#ifndef DEBUG
 #define DEBUG 0
-
-#if DEBUG
-#define DBG(x, a...) \
-   { printf ( __FILE__ ":%d,%s() " x "\n", __LINE__, __func__, ##a); }
-#else
-#define DBG(x, a...) do {} while (0)
 #endif
 
 #ifdef __GNUC__
@@ -86,5 +83,6 @@ typedef struct PSplashFont
 
 #include "psplash-fb.h"
 #include "psplash-console.h"
+#include "psplash-uci.h"
 
 #endif

@@ -19,18 +19,16 @@
  */
 
 #include "psplash.h"
-#include "psplash-config.h"
-#include "psplash-colors.h"
 #include "psplash-poky-img.h"
 #include "font.h"
 
-#define SPLIT_LINE_POS(fb)                                                           \
-	((fb)->height - ((PSPLASH_IMG_SPLIT_DENOMINATOR - PSPLASH_IMG_SPLIT_NUMERATOR) * \
-					 (fb)->height / PSPLASH_IMG_SPLIT_DENOMINATOR))
+#define SPLIT_LINE_POS(fb)                                                         \
+	((fb)->height - ((config.img_split_denominator - config.img_split_numerator) * \
+					 (fb)->height / config.img_split_denominator))
 
 void psplash_exit(int UNUSED(signum))
 {
-	DBG("mark");
+	ulog(LOG_DEBUG, "mark\n");
 
 	psplash_console_reset();
 }
@@ -41,25 +39,25 @@ void psplash_draw_msg(PSplashFB *fb, const char *msg)
 
 	psplash_fb_text_size(&w, &h, &font, msg);
 
-	DBG("displaying '%s' %ix%i\n", msg ? msg : "(null)", w, h);
+	ulog(LOG_DEBUG, "displaying '%s' %ix%i\n", msg ? msg : "(null)", w, h);
 
 	/* Clear */
 
 	psplash_fb_draw_rect(
 		fb,
 		0,
-		SPLIT_LINE_POS(fb) - h - PSPLASH_MSG_PADDING,
+		SPLIT_LINE_POS(fb) - h - config.msg_padding,
 		fb->width,
 		h,
-		PSPLASH_BACKGROUND_COLOR);
+		config.colors.background);
 
 	if (msg)
 	{
 		psplash_fb_draw_text(
 			fb,
 			(fb->width - w) / 2,
-			SPLIT_LINE_POS(fb) - h - PSPLASH_MSG_PADDING,
-			PSPLASH_TEXT_COLOR,
+			SPLIT_LINE_POS(fb) - h - config.msg_padding,
+			config.colors.text,
 			&font,
 			msg);
 	}
@@ -68,66 +66,68 @@ void psplash_draw_msg(PSplashFB *fb, const char *msg)
 void psplash_draw_progress(PSplashFB *fb, int value)
 {
 	int x, y, width, height, barwidth;
-	int padding = PSPLASH_BAR_BORDER_WIDTH + PSPLASH_BAR_BORDER_SPACE;
+	int padding = config.bar_border_width + config.bar_border_space;
 
-	x = ((fb->width - PSPLASH_BAR_WIDTH) / 2) + padding;
+	x = ((fb->width - config.bar_width) / 2) + padding;
 	y = SPLIT_LINE_POS(fb) + padding;
 
-	width  = PSPLASH_BAR_WIDTH - padding * 2;
-	height = PSPLASH_BAR_HEIGHT - padding * 2;
+	width  = config.bar_width - padding * 2;
+	height = config.bar_height - padding * 2;
 
 	if (value > 0)
 	{
 		barwidth = (CLAMP(value, 0, 100) * width) / 100;
 		psplash_fb_draw_rect(
-			fb, x + barwidth, y, width - barwidth, height, PSPLASH_BAR_BACKGROUND_COLOR);
-		psplash_fb_draw_rect(fb, x, y, barwidth, height, PSPLASH_BAR_COLOR);
+			fb, x + barwidth, y, width - barwidth, height, config.colors.bar_background);
+		psplash_fb_draw_rect(fb, x, y, barwidth, height, config.colors.bar);
 	}
 	else
 	{
 		barwidth = (CLAMP(-value, 0, 100) * width) / 100;
-		psplash_fb_draw_rect(fb, x, y, width - barwidth, height, PSPLASH_BAR_BACKGROUND_COLOR);
-		psplash_fb_draw_rect(fb, x + width - barwidth, y, barwidth, height, PSPLASH_BAR_COLOR);
+		psplash_fb_draw_rect(fb, x, y, width - barwidth, height, config.colors.bar_background);
+		psplash_fb_draw_rect(fb, x + width - barwidth, y, barwidth, height, config.colors.bar);
 	}
 
-	DBG("value: %i, width: %i, barwidth :%i\n", value, width, barwidth);
+	ulog(LOG_DEBUG, "value: %i, width: %i, barwidth :%i\n", value, width, barwidth);
 }
 
 void psplash_draw_progress_border(PSplashFB *fb)
 {
-	int x = (fb->width - PSPLASH_BAR_WIDTH) / 2;
+	int x = (fb->width - config.bar_width) / 2;
 	int y = SPLIT_LINE_POS(fb);
 
-#if PSPLASH_BAR_BORDER_WIDTH > 0
-	/* border */
-	psplash_fb_draw_box(
-		fb,
-		x,
-		y,
-		PSPLASH_BAR_WIDTH,
-		PSPLASH_BAR_HEIGHT,
-		PSPLASH_BAR_BORDER_WIDTH,
-		PSPLASH_BAR_BORDER_COLOR);
+	if (config.bar_border_width > 0)
+	{
+		/* border */
+		psplash_fb_draw_box(
+			fb,
+			x,
+			y,
+			config.bar_width,
+			config.bar_height,
+			config.bar_border_width,
+			config.colors.bar_border);
 
-#if PSPLASH_BAR_BORDER_SPACE > 0
-	/* border space */
-	psplash_fb_draw_box(
-		fb,
-		x + PSPLASH_BAR_BORDER_WIDTH,
-		y + PSPLASH_BAR_BORDER_WIDTH,
-		PSPLASH_BAR_WIDTH - PSPLASH_BAR_BORDER_WIDTH * 2,
-		PSPLASH_BAR_HEIGHT - PSPLASH_BAR_BORDER_WIDTH * 2,
-		PSPLASH_BAR_BORDER_SPACE,
-		PSPLASH_BAR_BORDER_SPACE_COLOR);
-#endif
-#endif
+		if (config.bar_border_space > 0)
+		{
+			/* border space */
+			psplash_fb_draw_box(
+				fb,
+				x + config.bar_border_width,
+				y + config.bar_border_width,
+				config.bar_width - config.bar_border_width * 2,
+				config.bar_height - config.bar_border_width * 2,
+				config.bar_border_space,
+				config.colors.bar_border_space);
+		}
+	}
 }
 
 static int parse_single_command(PSplashFB *fb, char *string)
 {
 	char *command;
 
-	DBG("got cmd %s", string);
+	ulog(LOG_DEBUG, "got cmd %s\n", string);
 
 	if (strcmp(string, "QUIT") == 0)
 		return 1;
@@ -243,9 +243,21 @@ void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 int main(int argc, char **argv)
 {
 	char *     tmpdir;
-	int        pipe_fd, i = 0, angle = 0, fbdev_id = 0, ret = 0;
+	int        pipe_fd, i = 0, ret = 0;
 	PSplashFB *fb;
-	bool       disable_console_switch = FALSE;
+
+	ulog_open(ULOG_STDIO, LOG_DAEMON, "psplash");
+#if DEBUG
+	ulog_threshold(LOG_DEBUG);
+#else
+	ulog_threshold(LOG_INFO);
+#endif
+
+	if (psplash_uci_read_config())
+	{
+		perror("uci config");
+		exit(-1);
+	}
 
 	signal(SIGHUP, psplash_exit);
 	signal(SIGINT, psplash_exit);
@@ -255,7 +267,7 @@ int main(int argc, char **argv)
 	{
 		if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "--no-console-switch"))
 		{
-			disable_console_switch = TRUE;
+			config.disable_console_switch = TRUE;
 			continue;
 		}
 
@@ -263,7 +275,7 @@ int main(int argc, char **argv)
 		{
 			if (++i >= argc)
 				goto fail;
-			angle = atoi(argv[i]);
+			config.angle = atoi(argv[i]);
 			continue;
 		}
 
@@ -271,7 +283,7 @@ int main(int argc, char **argv)
 		{
 			if (++i >= argc)
 				goto fail;
-			fbdev_id = atoi(argv[i]);
+			config.fbdev_id = atoi(argv[i]);
 			continue;
 		}
 
@@ -307,34 +319,44 @@ int main(int argc, char **argv)
 		exit(-2);
 	}
 
-	if (!disable_console_switch)
+	if (!config.disable_console_switch)
 		psplash_console_switch();
 
-	if ((fb = psplash_fb_new(angle, fbdev_id)) == NULL)
+	if ((fb = psplash_fb_new(config.angle, config.fbdev_id)) == NULL)
 	{
 		ret = -1;
 		goto fb_fail;
 	}
 
-	/* Clear the background with #ecece1 */
-	psplash_fb_draw_rect(fb, 0, 0, fb->width, fb->height, PSPLASH_BACKGROUND_COLOR);
+	/* Clear the background with background color */
+	psplash_fb_draw_rect(fb, 0, 0, fb->width, fb->height, config.colors.background);
 
 	/* Draw the Poky logo  */
-	psplash_fb_draw_image(
-		fb,
-		(fb->width - POKY_IMG_WIDTH) / 2,
-#if PSPLASH_IMG_FULLSCREEN
-		(fb->height - POKY_IMG_HEIGHT) / 2,
-#else
-		(fb->height * PSPLASH_IMG_SPLIT_NUMERATOR / PSPLASH_IMG_SPLIT_DENOMINATOR -
-		 POKY_IMG_HEIGHT) /
-			2,
-#endif
-		POKY_IMG_WIDTH,
-		POKY_IMG_HEIGHT,
-		POKY_IMG_BYTES_PER_PIXEL,
-		POKY_IMG_ROWSTRIDE,
-		POKY_IMG_RLE_PIXEL_DATA);
+	if (config.img_fullscreen)
+	{
+		psplash_fb_draw_image(
+			fb,
+			(fb->width - POKY_IMG_WIDTH) / 2,
+			(fb->height - POKY_IMG_HEIGHT) / 2,
+			POKY_IMG_WIDTH,
+			POKY_IMG_HEIGHT,
+			POKY_IMG_BYTES_PER_PIXEL,
+			POKY_IMG_ROWSTRIDE,
+			POKY_IMG_RLE_PIXEL_DATA);
+	}
+	else
+	{
+		psplash_fb_draw_image(
+			fb,
+			(fb->width - POKY_IMG_WIDTH) / 2,
+			(fb->height * config.img_split_numerator / config.img_split_denominator -
+				POKY_IMG_HEIGHT) / 2,
+			POKY_IMG_WIDTH,
+			POKY_IMG_HEIGHT,
+			POKY_IMG_BYTES_PER_PIXEL,
+			POKY_IMG_ROWSTRIDE,
+			POKY_IMG_RLE_PIXEL_DATA);
+	}
 
 	/* Draw progress bar border */
 	psplash_draw_progress_border(fb);
@@ -342,10 +364,8 @@ int main(int argc, char **argv)
 	/* Draw initial progress bar */
 	psplash_draw_progress(fb, 0);
 
-#ifdef PSPLASH_STARTUP_MSG
-	if (strlen(PSPLASH_STARTUP_MSG))
-		psplash_draw_msg(fb, PSPLASH_STARTUP_MSG);
-#endif
+	if (strlen(config.startup_msg))
+		psplash_draw_msg(fb, config.startup_msg);
 
 	psplash_main(fb, pipe_fd, 0);
 
@@ -354,7 +374,7 @@ int main(int argc, char **argv)
 fb_fail:
 	unlink(PSPLASH_FIFO);
 
-	if (!disable_console_switch)
+	if (!config.disable_console_switch)
 		psplash_console_reset();
 
 	return ret;

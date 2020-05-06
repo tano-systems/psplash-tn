@@ -18,6 +18,23 @@
 #ifndef _HAVE_PSPLASH_FB_H
 #define _HAVE_PSPLASH_FB_H
 
+typedef struct PSplashColor
+{
+	uint8 red;
+	uint8 green;
+	uint8 blue;
+} PSplashColor;
+
+static inline PSplashColor psplash_color_make(
+	uint8 red,
+	uint8 green,
+	uint8 blue
+)
+{
+	PSplashColor color = { .red = red, .green = green, .blue = blue };
+	return color;
+}
+
 enum RGBMode
 {
 	RGB565,
@@ -62,12 +79,10 @@ void psplash_fb_draw_box(
 	int        width,
 	int        height,
 	int        thickness,
-	uint8      red,
-	uint8      green,
-	uint8      blue);
+	PSplashColor color);
 
 void psplash_fb_draw_rect(
-	PSplashFB *fb, int x, int y, int width, int height, uint8 red, uint8 green, uint8 blue);
+	PSplashFB *fb, int x, int y, int width, int height, PSplashColor color);
 
 void psplash_fb_draw_image(
 	PSplashFB *fb,
@@ -75,7 +90,7 @@ void psplash_fb_draw_image(
 	int        y,
 	int        img_width,
 	int        img_height,
-	int        img_bytes_pre_pixel,
+	int        img_bytes_per_pixel,
 	int        img_rowstride,
 	uint8 *    rle_data);
 
@@ -85,9 +100,7 @@ void psplash_fb_draw_text(
 	PSplashFB *        fb,
 	int                x,
 	int                y,
-	uint8              red,
-	uint8              green,
-	uint8              blue,
+	PSplashColor       color,
 	const PSplashFont *font,
 	const char *       text);
 
