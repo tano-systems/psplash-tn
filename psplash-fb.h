@@ -81,18 +81,15 @@ void psplash_fb_draw_box(
 	int        thickness,
 	PSplashColor color);
 
+void psplash_fb_draw_img(
+	PSplashImage *image,
+	PSplashFB    *fb,
+	int           x,
+	int           y
+);
+
 void psplash_fb_draw_rect(
 	PSplashFB *fb, int x, int y, int width, int height, PSplashColor color);
-
-void psplash_fb_draw_image(
-	PSplashFB *fb,
-	int        x,
-	int        y,
-	int        img_width,
-	int        img_height,
-	int        img_bytes_per_pixel,
-	int        img_rowstride,
-	uint8 *    rle_data);
 
 void psplash_fb_text_size(int *width, int *height, const PSplashFont *font, const char *text);
 

@@ -424,63 +424,31 @@ void psplash_fb_draw_box(
 	}
 }
 
-void psplash_fb_draw_image(
-	PSplashFB *fb,
-	int        x,
-	int        y,
-	int        img_width,
-	int        img_height,
-	int        img_bytes_per_pixel,
-	int        img_rowstride,
-	uint8 *    rle_data)
+void psplash_fb_draw_img(
+	PSplashImage *image,
+	PSplashFB    *fb,
+	int           x,
+	int           y
+)
 {
-	uint8 *      p  = rle_data;
-	int          dx = 0, dy = 0, total_len;
-	unsigned int len;
+	int dx;
+	int dy;
 
-	total_len = img_rowstride * img_height;
-
-	/* FIXME: Optimise, check for over runs ... */
-	while ((p - rle_data) < total_len)
+	for (dy = 0; dy < image->height; dy++)
 	{
-		len = *(p++);
+		uint8 *row = image->row_pointers[dy];
 
-		if (len & 128)
+		for (dx = 0; dx < image->width; dx++)
 		{
-			len -= 128;
+			uint8 *ptr = &row[dx * 4];
 
-			if (len == 0)
-				break;
-
-			do
+			if (ptr[3] == 0) /* transparent */
+				continue;
+			else
 			{
-				if ((img_bytes_per_pixel < 4 || *(p + 3)) && dx < img_width)
-					psplash_fb_plot_pixel(fb, x + dx, y + dy, psplash_color_make(*(p), *(p + 1), *(p + 2)));
-				if (++dx * img_bytes_per_pixel >= img_rowstride)
-				{
-					dx = 0;
-					dy++;
-				}
-			} while (--len);
-
-			p += img_bytes_per_pixel;
-		}
-		else
-		{
-			if (len == 0)
-				break;
-
-			do
-			{
-				if ((img_bytes_per_pixel < 4 || *(p + 3)) && dx < img_width)
-					psplash_fb_plot_pixel(fb, x + dx, y + dy, psplash_color_make(*(p), *(p + 1), *(p + 2)));
-				if (++dx * img_bytes_per_pixel >= img_rowstride)
-				{
-					dx = 0;
-					dy++;
-				}
-				p += img_bytes_per_pixel;
-			} while (--len && (p - rle_data) < total_len);
+				psplash_fb_plot_pixel(fb, x + dx, y + dy,
+					psplash_color_make(ptr[0], ptr[1], ptr[2]));
+			}
 		}
 	}
 }

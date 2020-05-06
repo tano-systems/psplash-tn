@@ -81,6 +81,7 @@ typedef struct PSplashFont
 	u_int32_t *content;
 } PSplashFont;
 
+#include "psplash-image.h"
 #include "psplash-fb.h"
 #include "psplash-console.h"
 #include "psplash-uci.h"

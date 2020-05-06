@@ -22,10 +22,13 @@
 #include "psplash-fb.h"
 
 #define PSPLASH_STARTUP_MSG_SIZE 256
+#define PSPLASH_IMAGE_PATH_SIZE 256
 
 typedef struct PSplashConfig
 {
 	char startup_msg[PSPLASH_STARTUP_MSG_SIZE];
+
+	char image[PSPLASH_IMAGE_PATH_SIZE];
 
 	int disable_console_switch;
 	int angle;

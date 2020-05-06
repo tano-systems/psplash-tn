@@ -19,7 +19,6 @@
  */
 
 #include "psplash.h"
-#include "psplash-poky-img.h"
 #include "font.h"
 
 #define SPLIT_LINE_POS(fb)                                                         \
@@ -242,6 +241,7 @@ void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 
 int main(int argc, char **argv)
 {
+	PSplashImage image;
 	char *     tmpdir;
 	int        pipe_fd, i = 0, ret = 0;
 	PSplashFB *fb;
@@ -295,6 +295,9 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
+	if (psplash_image_read(&image, config.image))
+		exit(-1);
+
 	tmpdir = getenv("TMPDIR");
 
 	if (!tmpdir)
@@ -334,28 +337,22 @@ int main(int argc, char **argv)
 	/* Draw the Poky logo  */
 	if (config.img_fullscreen)
 	{
-		psplash_fb_draw_image(
+		psplash_fb_draw_img(
+			&image,
 			fb,
-			(fb->width - POKY_IMG_WIDTH) / 2,
-			(fb->height - POKY_IMG_HEIGHT) / 2,
-			POKY_IMG_WIDTH,
-			POKY_IMG_HEIGHT,
-			POKY_IMG_BYTES_PER_PIXEL,
-			POKY_IMG_ROWSTRIDE,
-			POKY_IMG_RLE_PIXEL_DATA);
+			(fb->width - image.width) / 2,
+			(fb->height - image.height) / 2
+		);
 	}
 	else
 	{
-		psplash_fb_draw_image(
+		psplash_fb_draw_img(
+			&image,
 			fb,
-			(fb->width - POKY_IMG_WIDTH) / 2,
+			(fb->width - image.width) / 2,
 			(fb->height * config.img_split_numerator / config.img_split_denominator -
-				POKY_IMG_HEIGHT) / 2,
-			POKY_IMG_WIDTH,
-			POKY_IMG_HEIGHT,
-			POKY_IMG_BYTES_PER_PIXEL,
-			POKY_IMG_ROWSTRIDE,
-			POKY_IMG_RLE_PIXEL_DATA);
+				image.height) / 2
+		);
 	}
 
 	/* Draw progress bar border */
@@ -367,6 +364,7 @@ int main(int argc, char **argv)
 	if (strlen(config.startup_msg))
 		psplash_draw_msg(fb, config.startup_msg);
 
+	psplash_image_free(&image);
 	psplash_main(fb, pipe_fd, 0);
 
 	psplash_fb_destroy(fb);

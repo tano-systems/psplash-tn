@@ -79,6 +79,17 @@ int psplash_uci_read_config(void)
 	ptr.s = NULL;
 	ptr.section = "config";
 
+	/* config.image */
+	ptr.o = NULL;
+	ptr.option = "image";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+	{
+		strncpy(config.image, ptr.o->v.string,
+			sizeof(config.image) - 1);
+	}
+
 	/* config.startup_msg */
 	ptr.o = NULL;
 	ptr.option = "startup_msg";
