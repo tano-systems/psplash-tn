@@ -1,3 +1,4 @@
+build/
 configure
 config.h
 config.h.in
