@@ -139,7 +139,8 @@ static int parse_single_command(PSplashFB *fb, char *string)
 	}
 	else if (!strcmp(command, "MSG"))
 	{
-		psplash_draw_msg(fb, strtok(NULL, "\0"));
+		if (!config.ignore_msg_cmds)
+			psplash_draw_msg(fb, strtok(NULL, "\0"));
 	}
 	else if (!strcmp(command, "QUIT"))
 	{

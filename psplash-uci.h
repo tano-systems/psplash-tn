@@ -30,6 +30,7 @@ typedef struct PSplashConfig
 
 	char image[PSPLASH_IMAGE_PATH_SIZE];
 
+	int ignore_msg_cmds;
 	int disable_console_switch;
 	int angle;
 	int fbdev_id;

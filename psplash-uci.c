@@ -24,6 +24,7 @@ static PSplashConfig default_config =
 	.angle                  = 0,
 	.fbdev_id               = 0,
 	.disable_console_switch = 0,
+	.ignore_msg_cmds        = 0,
 	.startup_msg            = PSPLASH_STARTUP_MSG,
 	.img_fullscreen         = PSPLASH_IMG_FULLSCREEN,
 	.img_split_numerator    = PSPLASH_IMG_SPLIT_NUMERATOR,
@@ -100,6 +101,14 @@ int psplash_uci_read_config(void)
 		strncpy(config.startup_msg, ptr.o->v.string,
 			sizeof(config.startup_msg) - 1);
 	}
+
+	/* config.ignore_msg_cmds */
+	ptr.o = NULL;
+	ptr.option = "ignore_msg_cmds";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+		config.ignore_msg_cmds = !!(int)strtoul(ptr.o->v.string, NULL, 0);
 
 	/* config.disable_console_switch */
 	ptr.o = NULL;
