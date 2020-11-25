@@ -36,6 +36,9 @@ void psplash_draw_msg(PSplashFB *fb, const char *msg)
 {
 	int w, h;
 
+	if (!config.enable_msg)
+		return;
+
 	psplash_fb_text_size(&w, &h, &font, msg);
 
 	ulog(LOG_DEBUG, "displaying '%s' %ix%i\n", msg ? msg : "(null)", w, h);
@@ -67,6 +70,9 @@ void psplash_draw_progress(PSplashFB *fb, int value)
 	int x, y, width, height, barwidth;
 	int padding = config.bar_border_width + config.bar_border_space;
 
+	if (!config.enable_bar)
+		return;
+
 	x = ((fb->width - config.bar_width) / 2) + padding;
 	y = SPLIT_LINE_POS(fb) + padding;
 
@@ -94,6 +100,9 @@ void psplash_draw_progress_border(PSplashFB *fb)
 {
 	int x = (fb->width - config.bar_width) / 2;
 	int y = SPLIT_LINE_POS(fb);
+
+	if (!config.enable_bar)
+		return;
 
 	if (config.bar_border_width > 0)
 	{

@@ -25,6 +25,8 @@ static PSplashConfig default_config =
 	.fbdev_id               = 0,
 	.disable_console_switch = 0,
 	.ignore_msg_cmds        = 0,
+	.enable_bar             = 1,
+	.enable_msg             = 1,
 	.startup_msg            = PSPLASH_STARTUP_MSG,
 	.img_fullscreen         = PSPLASH_IMG_FULLSCREEN,
 	.img_split_numerator    = PSPLASH_IMG_SPLIT_NUMERATOR,
@@ -109,6 +111,22 @@ int psplash_uci_read_config(void)
 	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
 	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
 		config.ignore_msg_cmds = !!(int)strtoul(ptr.o->v.string, NULL, 0);
+
+	/* config.enable_bar */
+	ptr.o = NULL;
+	ptr.option = "enable_bar";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+		config.enable_bar = !!(int)strtoul(ptr.o->v.string, NULL, 0);
+
+	/* config.enable_msg */
+	ptr.o = NULL;
+	ptr.option = "enable_msg";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+		config.enable_msg = !!(int)strtoul(ptr.o->v.string, NULL, 0);
 
 	/* config.disable_console_switch */
 	ptr.o = NULL;
