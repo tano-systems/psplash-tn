@@ -1,0 +1,3 @@
+[submodule "3rdparty/gifdec"]
+	path = 3rdparty/gifdec
+	url = https://github.com/lecram/gifdec.git

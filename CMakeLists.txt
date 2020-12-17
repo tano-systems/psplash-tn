@@ -5,6 +5,7 @@ INCLUDE(CheckFunctionExists)
 
 OPTION(ENABLE_PNG "Enable support for PNG loading" ON)
 OPTION(ENABLE_JPEG "Enable support for JPEG loading" OFF)
+OPTION(ENABLE_ALIVE_GIF "Enable alive GIF animation support" OFF)
 
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
@@ -26,6 +27,15 @@ SET(PSPLASH_SOURCES
 SET(PSPLASH_WRITE_SOURCES
 	psplash-write.c
 )
+
+IF(ENABLE_ALIVE_GIF)
+	SET(PSPLASH_SOURCES ${PSPLASH_SOURCES}
+		psplash-alive.c
+		3rdparty/gifdec/gifdec.c
+	)
+	INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/gifdec)
+	ADD_DEFINITIONS(-DENABLE_ALIVE_GIF)
+ENDIF()
 
 IF(ENABLE_PNG)
 	FIND_LIBRARY(png NAMES png)

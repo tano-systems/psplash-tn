@@ -44,7 +44,19 @@ static PSplashConfig default_config =
 		.bar_background   = { PSPLASH_BAR_BACKGROUND_COLOR },
 		.bar_border       = { PSPLASH_BAR_BORDER_COLOR },
 		.bar_border_space = { PSPLASH_BAR_BORDER_SPACE_COLOR }
-	}
+	},
+
+#if defined(ENABLE_ALIVE_GIF)
+	.alive =
+	{
+		.enable                  = 0,
+		.animation_mode          = PSPLASH_ALIVE_ANIMATION_MODE_AUTO,
+		.img_v_split_numerator   = PSPLASH_ALIVE_IMG_V_SPLIT_NUMERATOR,
+		.img_v_split_denominator = PSPLASH_ALIVE_IMG_V_SPLIT_DENOMINATOR,
+		.img_h_split_numerator   = PSPLASH_ALIVE_IMG_H_SPLIT_NUMERATOR,
+		.img_h_split_denominator = PSPLASH_ALIVE_IMG_H_SPLIT_DENOMINATOR
+	},
+#endif
 };
 
 PSplashConfig config;
@@ -194,7 +206,7 @@ int psplash_uci_read_config(void)
 
 	if (!config.img_split_denominator)
 	{
-		ulog(LOG_ERR, "uci: Readed unsupported config.img_split_denominator = %d\n",
+		ulog(LOG_ERR, "uci: Readed unsupported config.img_split_denominator = %d (fallback to 1)\n",
 			config.img_split_denominator);
 		config.img_split_denominator = 1;
 	}
@@ -292,6 +304,99 @@ int psplash_uci_read_config(void)
 	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
 	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
 		config.colors.bar_border_space = ul2color(strtoul(ptr.o->v.string, NULL, 16));
+
+#if defined(ENABLE_ALIVE_GIF)
+	/*
+	 * Alive image/messages configuration
+	 */
+	ptr.s = NULL;
+	ptr.section = "alive";
+
+	/* enable */
+	ptr.o = NULL;
+	ptr.option = "enable";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+		config.alive.enable = !!(int)strtoul(ptr.o->v.string, NULL, 0);
+
+	/* image path */
+	ptr.o = NULL;
+	ptr.option = "image";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+	{
+		strncpy(config.alive.image, ptr.o->v.string,
+			sizeof(config.alive.image) - 1);
+	}
+
+	/* animation mode */
+	ptr.o = NULL;
+	ptr.option = "animation_mode";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+	{
+		if (!strcmp(ptr.o->v.string, "message") ||
+		    !strcmp(ptr.o->v.string, "msg"))
+			config.alive.animation_mode = PSPLASH_ALIVE_ANIMATION_MODE_MSG;
+		else if (!strcmp(ptr.o->v.string, "auto"))
+			config.alive.animation_mode = PSPLASH_ALIVE_ANIMATION_MODE_AUTO;
+		else
+		{
+			ulog(LOG_ERR, "uci: Unknown config.alive.animation_mode '%s' (fallback to 'auto')\n",
+				ptr.o->v.string);
+			config.alive.animation_mode = PSPLASH_ALIVE_ANIMATION_MODE_AUTO;
+		}
+	}
+
+	/* config.alive.img_v_split_numerator */
+	ptr.o = NULL;
+	ptr.option = "img_v_split_numerator";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+		config.alive.img_v_split_numerator = (int)strtoul(ptr.o->v.string, NULL, 0);
+
+	/* config.alive.img_v_split_denominator */
+	ptr.o = NULL;
+	ptr.option = "img_v_split_denominator";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+		config.alive.img_v_split_denominator = (int)strtoul(ptr.o->v.string, NULL, 0);
+
+	if (!config.alive.img_v_split_denominator)
+	{
+		ulog(LOG_ERR, "uci: Readed unsupported config.alive.img_v_split_denominator = %d (fallback to 1)\n",
+			config.alive.img_v_split_denominator);
+		config.alive.img_v_split_denominator = 1;
+	}
+
+	/* config.alive.img_h_split_numerator */
+	ptr.o = NULL;
+	ptr.option = "img_h_split_numerator";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+		config.alive.img_h_split_numerator = (int)strtoul(ptr.o->v.string, NULL, 0);
+
+	/* config.alive.img_h_split_denominator */
+	ptr.o = NULL;
+	ptr.option = "img_h_split_denominator";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+		config.alive.img_h_split_denominator = (int)strtoul(ptr.o->v.string, NULL, 0);
+
+	if (!config.alive.img_h_split_denominator)
+	{
+		ulog(LOG_ERR, "uci: Readed unsupported config.alive.img_h_split_denominator = %d (fallback to 1)\n",
+			config.alive.img_h_split_denominator);
+		config.alive.img_h_split_denominator = 1;
+	}
+#endif
 
 	uci_free_context(uci_ctx);
 	return 0;

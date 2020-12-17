@@ -78,6 +78,9 @@ void psplash_fb_destroy(PSplashFB *fb);
 
 PSplashFB *psplash_fb_new(int angle, int fbdev_id);
 
+void psplash_fb_plot_pixel(
+	PSplashFB *fb, int x, int y, PSplashColor color);
+
 void psplash_fb_draw_box(
 	PSplashFB *fb,
 	int        x,

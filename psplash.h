@@ -45,6 +45,10 @@
 
 #include <libubox/ulog.h>
 
+#if defined(ENABLE_ALIVE_GIF)
+#include <time.h>
+#endif
+
 typedef uint8_t  uint8;
 typedef uint16_t uint16;
 typedef int bool;
@@ -85,5 +89,9 @@ typedef struct PSplashFont
 #include "psplash-fb.h"
 #include "psplash-console.h"
 #include "psplash-uci.h"
+
+#if defined(ENABLE_ALIVE_GIF)
+#include "psplash-alive.h"
+#endif
 
 #endif

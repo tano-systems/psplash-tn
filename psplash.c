@@ -155,6 +155,16 @@ static int parse_single_command(PSplashFB *fb, char *string)
 	{
 		return 1;
 	}
+#if defined(ENABLE_ALIVE_GIF)
+	else if (!strcmp(command, "ALIVE"))
+	{
+		if (config.alive.animation_mode == PSPLASH_ALIVE_ANIMATION_MODE_MSG)
+		{
+			psplash_alive_frame_render(fb);
+			psplash_alive_frame_next();
+		}
+	}
+#endif
 
 	psplash_fb_flip(fb, 0);
 	return 0;
@@ -180,6 +190,53 @@ static int parse_commands(PSplashFB *fb, char *string, int len)
 	return 0;
 }
 
+#if defined(ENABLE_ALIVE_GIF)
+
+static inline int tm1_ge_tm2(const struct timespec *tm1, const struct timespec *tm2)
+{
+	if (tm1->tv_sec == tm2->tv_sec)
+		return tm1->tv_nsec >= tm2->tv_nsec;
+	else
+		return tm1->tv_sec >= tm2->tv_sec;
+	
+}
+
+static inline int tm_add_ms(struct timespec *tm, unsigned int ms)
+{
+	tm->tv_sec += ms / 1000;
+	tm->tv_nsec += (ms % 1000) * 1000000UL;
+
+	if (tm->tv_nsec >= 1000000000UL)
+	{
+		tm->tv_sec++;
+		tm->tv_nsec -= 1000000000UL;
+	}
+}
+
+static inline void tm_diff(
+	const struct timespec *tm2,
+	const struct timespec *tm1,
+	struct timeval *tmv
+)
+{
+	unsigned long long usec1 = tm1->tv_sec * 1000000UL + (tm1->tv_nsec / 1000UL);
+	unsigned long long usec2 = tm2->tv_sec * 1000000UL + (tm2->tv_nsec / 1000UL);
+
+	if (usec2 > usec1)
+	{
+		unsigned long long usec_diff = usec2 - usec1;
+
+		tmv->tv_sec  = usec_diff / 1000000UL;
+		tmv->tv_usec = usec_diff % 1000000UL;
+	}
+	else
+	{
+		tmv->tv_sec  = 0;
+		tmv->tv_usec = 0;
+	}
+}
+#endif
+
 void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 {
 	int            err;
@@ -189,29 +246,70 @@ void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 	char *         end;
 	char           command[2048];
 
-	tv.tv_sec  = timeout;
-	tv.tv_usec = 0;
+#if defined(ENABLE_ALIVE_GIF)
+	struct timespec tm_current;
+	struct timespec tm_next_frame;
+	struct timespec tm_timeout;
 
-	FD_ZERO(&descriptors);
-	FD_SET(pipe_fd, &descriptors);
+	clock_gettime(CLOCK_MONOTONIC, &tm_current);
 
-	end = command;
+	tm_next_frame = tm_timeout = tm_current;
+	tm_add_ms(&tm_timeout, timeout * 1000);
+#endif
 
 	while (1)
 	{
-		if (timeout != 0)
+		FD_ZERO(&descriptors);
+		FD_SET(pipe_fd, &descriptors);
+
+		end = &command[length];
+
+#if defined(ENABLE_ALIVE_GIF)
+		if (config.alive.animation_mode == PSPLASH_ALIVE_ANIMATION_MODE_AUTO)
+		{
+			clock_gettime(CLOCK_MONOTONIC, &tm_current);
+
+			if (timeout != 0)
+			{
+				if (tm1_ge_tm2(&tm_current, &tm_timeout))
+					return;
+
+				tm_timeout = tm_current;
+				tm_add_ms(&tm_timeout, timeout * 1000);
+			}
+
+			if (tm1_ge_tm2(&tm_current, &tm_next_frame))
+			{
+				tm_add_ms(&tm_next_frame, psplash_alive_frame_duration_ms());
+
+				psplash_alive_frame_render(fb);
+				psplash_alive_frame_next();
+			}
+
+			tm_diff(&tm_next_frame, &tm_current, &tv);
+
 			err = select(pipe_fd + 1, &descriptors, NULL, NULL, &tv);
+			if (err == 0) /* timeout */
+				continue;
+		}
 		else
-			err = select(pipe_fd + 1, &descriptors, NULL, NULL, NULL);
+		{
+#endif
+			if (timeout != 0)
+			{
+				tv.tv_sec  = timeout;
+				tv.tv_usec = 0;
+
+				err = select(pipe_fd + 1, &descriptors, NULL, NULL, &tv);
+			}
+			else
+				err = select(pipe_fd + 1, &descriptors, NULL, NULL, NULL);
+#if defined(ENABLE_ALIVE_GIF)
+		}
+#endif
 
 		if (err <= 0)
-		{
-			/*
-			if (errno == EINTR)
-			  continue;
-			*/
 			return;
-		}
 
 		length += read(pipe_fd, end, sizeof(command) - (end - command));
 
@@ -220,7 +318,7 @@ void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 			/* Reopen to see if there's anything more for us */
 			close(pipe_fd);
 			pipe_fd = open(PSPLASH_FIFO, O_RDONLY | O_NONBLOCK);
-			goto out;
+			continue;
 		}
 
 		if (command[length - 1] == '\0')
@@ -236,15 +334,6 @@ void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 				return;
 			length = 0;
 		}
-
-	out:
-		end = &command[length];
-
-		tv.tv_sec  = timeout;
-		tv.tv_usec = 0;
-
-		FD_ZERO(&descriptors);
-		FD_SET(pipe_fd, &descriptors);
 	}
 
 	return;
@@ -308,6 +397,11 @@ int main(int argc, char **argv)
 
 	if (psplash_image_read(&image, config.image))
 		exit(-1);
+
+#if defined(ENABLE_ALIVE_GIF)
+	if (psplash_alive_load())
+		exit(-1);
+#endif
 
 	tmpdir = getenv("TMPDIR");
 
@@ -385,7 +479,15 @@ int main(int argc, char **argv)
 	*/
 	psplash_fb_flip(fb, 1);
 
+#if defined(ENABLE_ALIVE_GIF)
+	psplash_alive_init();
+#endif
+
 	psplash_main(fb, pipe_fd, 0);
+
+#if defined(ENABLE_ALIVE_GIF)
+	psplash_alive_destroy();
+#endif
 
 	psplash_fb_destroy(fb);
 

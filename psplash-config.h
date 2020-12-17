@@ -1,6 +1,9 @@
 /*
  *  pslash - a lightweight framebuffer splashscreen for embedded devices.
  *
+ *  Copyright (c) 2020 Tano Systems LLC
+ *  Author: Anton Kikin <a.kikin@tano-systems.com>
+ *
  *  Copyright (c) 2014 MenloSystems GmbH
  *  Author: Olaf Mandel <o.mandel@menlosystems.com>
  *
@@ -45,5 +48,21 @@
 
 /* Size in pixels between progress bar and its border */
 #define PSPLASH_BAR_BORDER_SPACE 2
+
+#if defined(ENABLE_ALIVE_GIF)
+
+/* Position of the alive image split from top edge, numerator of fraction */
+#define PSPLASH_ALIVE_IMG_V_SPLIT_NUMERATOR 1
+
+/* Position of the alive image split from top edge, denominator of fraction */
+#define PSPLASH_ALIVE_IMG_V_SPLIT_DENOMINATOR 6
+
+/* Position of the alive image split from left edge, numerator of fraction */
+#define PSPLASH_ALIVE_IMG_H_SPLIT_NUMERATOR 1
+
+/* Position of the alive image split from left edge, denominator of fraction */
+#define PSPLASH_ALIVE_IMG_H_SPLIT_DENOMINATOR 6
+
+#endif
 
 #endif

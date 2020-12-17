@@ -366,7 +366,7 @@ fail:
 
 #define OFFSET(fb, x, y) (((y) * (fb)->stride) + ((x) * ((fb)->bpp >> 3)))
 
-static inline void
+void
 psplash_fb_plot_pixel(PSplashFB *fb, int x, int y, PSplashColor color)
 {
 	/* Always write to back data (bdata) which points to the right data with or

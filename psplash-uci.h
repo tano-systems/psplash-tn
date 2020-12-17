@@ -21,6 +21,10 @@
 #include <uci.h>
 #include "psplash-fb.h"
 
+#if defined(ENABLE_ALIVE_GIF)
+#include "psplash-alive.h"
+#endif
+
 #define PSPLASH_STARTUP_MSG_SIZE 256
 #define PSPLASH_IMAGE_PATH_SIZE 256
 
@@ -58,6 +62,23 @@ typedef struct PSplashConfig
 		PSplashColor bar_border_space;
 
 	} colors;
+
+#if defined(ENABLE_ALIVE_GIF)
+	struct
+	{
+		int enable;
+		char image[PSPLASH_IMAGE_PATH_SIZE];
+
+		enum PSplashAliveAnimationMode animation_mode;
+
+		int img_v_split_numerator;
+		int img_v_split_denominator;
+
+		int img_h_split_numerator;
+		int img_h_split_denominator;
+
+	} alive;
+#endif
 
 } PSplashConfig;
 
