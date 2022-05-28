@@ -196,7 +196,7 @@ PSplashFB *psplash_fb_new(int angle, int fbdev_id)
 	/* Setup double virtual resolution for double buffering */
 	if (ioctl(fb->fd, FBIOPAN_DISPLAY, &fb_var) == -1)
 	{
-		fprintf(stderr, "FBIOPAN_DISPLAY not supported, double buffering disabled");
+		fprintf(stderr, "FBIOPAN_DISPLAY not supported, double buffering disabled\n");
 	}
 	else
 	{
@@ -210,13 +210,13 @@ PSplashFB *psplash_fb_new(int angle, int fbdev_id)
 			fb_var.yres_virtual = fb_var.yres * 2;
 			if (ioctl(fb->fd, FBIOPUT_VSCREENINFO, &fb_var) == -1)
 			{
-				fprintf(stderr, "FBIOPUT_VSCREENINFO failed, double buffering disabled");
+				fprintf(stderr, "FBIOPUT_VSCREENINFO failed, double buffering disabled\n");
 			}
 			else
 			{
 				if (ioctl(fb->fd, FBIOGET_FSCREENINFO, &fb_fix) == -1)
 				{
-					perror("Error getting the fixed framebuffer info");
+					perror("Error getting the fixed framebuffer info\n");
 					goto fail;
 				}
 				else
@@ -288,7 +288,7 @@ PSplashFB *psplash_fb_new(int angle, int fbdev_id)
 
 	if (fb->base == (char *)-1)
 	{
-		perror("Error cannot mmap framebuffer ");
+		perror("Error cannot mmap framebuffer");
 		goto fail;
 	}
 
