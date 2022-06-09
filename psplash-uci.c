@@ -23,6 +23,7 @@ static PSplashConfig default_config =
 {
 	.angle                  = 0,
 	.fbdev_id               = 0,
+	.fbnodb                 = 0,
 	.disable_console_switch = 0,
 	.ignore_msg_cmds        = 0,
 	.enable_bar             = 1,
@@ -179,6 +180,14 @@ int psplash_uci_read_config(void)
 		ulog(LOG_ERR, "uci: Readed unsupported config.fbdev_id = %d\n", config.fbdev_id);
 		config.fbdev_id = 0;
 	}
+
+	/* config.fbnodb */
+	ptr.o = NULL;
+	ptr.option = "fbnodb";
+
+	uci_lookup_ptr(uci_ctx, &ptr, NULL, false);
+	if (ptr.o && (ptr.o->type == UCI_TYPE_STRING))
+		config.fbnodb = !!(int)strtoul(ptr.o->v.string, NULL, 0);
 
 	/* config.img_fullscreen */
 	ptr.o = NULL;

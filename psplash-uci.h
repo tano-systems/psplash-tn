@@ -41,6 +41,7 @@ typedef struct PSplashConfig
 	int disable_console_switch;
 	int angle;
 	int fbdev_id;
+	int fbnodb;
 
 	int img_fullscreen;
 	int img_split_numerator;
