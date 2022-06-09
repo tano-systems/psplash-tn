@@ -131,11 +131,13 @@ void psplash_draw_progress_border(PSplashFB *fb)
 	}
 }
 
-static int parse_single_command(PSplashFB *fb, char *string)
+static int parse_single_command(PSplashFB *fb, char *string, int *rendered)
 {
 	char *command;
 
 	ulog(LOG_DEBUG, "got cmd %s\n", string);
+
+	*rendered = 0;
 
 	if (strcmp(string, "QUIT") == 0)
 		return 1;
@@ -145,11 +147,15 @@ static int parse_single_command(PSplashFB *fb, char *string)
 	if (!strcmp(command, "PROGRESS"))
 	{
 		psplash_draw_progress(fb, atoi(strtok(NULL, "\0")));
+		*rendered = 1;
 	}
 	else if (!strcmp(command, "MSG"))
 	{
 		if (!config.ignore_msg_cmds)
+		{
 			psplash_draw_msg(fb, strtok(NULL, "\0"));
+			*rendered = 1;
+		}
 	}
 	else if (!strcmp(command, "QUIT"))
 	{
@@ -160,27 +166,38 @@ static int parse_single_command(PSplashFB *fb, char *string)
 	{
 		if (config.alive.animation_mode == PSPLASH_ALIVE_ANIMATION_MODE_MSG)
 		{
-			psplash_alive_frame_render(fb);
 			psplash_alive_frame_next();
+			if (!fb->double_buffering)
+				psplash_alive_frame_render(fb);
+			*rendered = 1;
 		}
 	}
 #endif
 
-	psplash_fb_flip(fb, 0);
 	return 0;
 }
 
-static int parse_commands(PSplashFB *fb, char *string, int len)
+static int parse_commands(PSplashFB *fb, char *string, int len, int *rendered)
 {
 	int   i;
 	char *command = string;
+
+	*rendered = 0;
 
 	for (i = 0; i < len; i++)
 	{
 		if ((string[i] == 0) || (string[i] == '\n'))
 		{
+			int ret = 0;
+			int single_rendered = 0;
+
 			string[i] = 0;
-			if (parse_single_command(fb, command))
+			ret = parse_single_command(fb, command, &single_rendered);
+
+			if (single_rendered)
+				*rendered = 1;
+
+			if (ret)
 				return 1;
 
 			command = &string[i + 1];
@@ -240,6 +257,7 @@ static inline void tm_diff(
 void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 {
 	int            err;
+	int            rendered;
 	ssize_t        length = 0;
 	fd_set         descriptors;
 	struct timeval tv;
@@ -282,8 +300,9 @@ void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 			{
 				tm_add_ms(&tm_next_frame, psplash_alive_frame_duration_ms());
 
-				psplash_alive_frame_render(fb);
 				psplash_alive_frame_next();
+				psplash_alive_frame_render(fb);
+				psplash_fb_flip(fb, 0);
 			}
 
 			tm_diff(&tm_next_frame, &tm_current, &tv);
@@ -321,19 +340,32 @@ void psplash_main(PSplashFB *fb, int pipe_fd, int timeout)
 			continue;
 		}
 
+		err = 0;
+
 		if (command[length - 1] == '\0')
 		{
-			if (parse_commands(fb, command, length))
-				return;
+			err = parse_commands(fb, command, length, &rendered);
 			length = 0;
 		}
 		else if (command[length - 1] == '\n')
 		{
 			command[length - 1] = '\0';
-			if (parse_commands(fb, command, length))
-				return;
+			err = parse_commands(fb, command, length, &rendered);
 			length = 0;
 		}
+
+		if (rendered)
+		{
+#if defined(ENABLE_ALIVE_GIF)
+			psplash_alive_frame_render(fb);
+			psplash_fb_flip(fb, 1);
+#else
+			psplash_fb_flip(fb, 0);
+#endif
+		}
+
+		if (err)
+			return;
 	}
 
 	return;
