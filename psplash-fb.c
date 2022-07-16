@@ -198,6 +198,19 @@ PSplashFB *psplash_fb_new(int angle, int fbdev_id)
 	{
 		ulog(LOG_DEBUG, "Double buffering forced to disabled\n");
 		fb->double_buffering = 0;
+
+		if (fb_var.yres_virtual != fb_var.yres)
+		{
+			/* Disable double buffering if its enabled */
+			fb_var.yres_virtual = fb_var.yres;
+			fb_var.yoffset = 0;
+
+			if (ioctl(fb->fd, FBIOPUT_VSCREENINFO, &fb_var) == -1)
+			{
+				perror("FBIOPUT_VSCREENINFO failed");
+				goto fail;
+			}
+		}
 	}
 	else
 	{
